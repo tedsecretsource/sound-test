@@ -19,15 +19,8 @@ The following HTML variants should all be valid and render and behave equally (a
 <audio controls><source src="573840__msxp__jazz-bar-people-ambience-la-fontaine-copenhagen.wav" /></audio></p>
 
 ```
-<p>Fails in Safari
-<audio controls src="./573840__msxp__jazz-bar-people-ambience-la-fontaine-copenhagen.wav"></audio></p>
 
-<p>Fails in Safari
-<audio controls src="./573840__msxp__jazz-bar-people-ambience-la-fontaine-copenhagen.wav"><source src="./573840__msxp__jazz-bar-people-ambience-la-fontaine-copenhagen.wav" /></audio></p>
-
-<p>Works in Safari
-<audio controls><source src="573840__msxp__jazz-bar-people-ambience-la-fontaine-copenhagen.wav" /></audio></p>
-
+[Here is a link to the actual tests](./sound-test.html)
 
 ### Notes
 
