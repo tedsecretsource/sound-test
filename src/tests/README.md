@@ -25,7 +25,7 @@ Now that I've managed to get it working even in plain JavaScript, I've moved tha
 
 Apparently, there was something amiss in my code logic. I don't really know what it was. Moving code into its own function helped, though, as I did find one or two differences between the original, separate MediaRecorder implementations and the one that uses a single MediaRecorder initializer.
 
-[Here is a link to the actual tests mentioned above](./sound-test.html)
+[Here is a link to the actual tests mentioned above](https://tedsecretsource.github.io/sound-test/src/tests/sound-test.html)
 
 ### Notes
 
