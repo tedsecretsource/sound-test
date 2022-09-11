@@ -1,6 +1,93 @@
 <html>
     <head>
         <title>Sound Test</title>
+        <script>
+            let recordedDataBlob, mediaRecorder, recordedData = [], audioSrc, audioSrcAtts = {}
+            const audioSrcFile = './573840__msxp__jazz-bar-people-ambience-la-fontaine-copenhagen.wav'
+            
+            const updateSrcURL = (blob) => {
+                let audio = document.querySelector('#audio')
+                let url = URL.createObjectURL(blob)
+                audio.src = url
+                document.querySelector('#loading').style.display = 'none'
+                audio.style.visibility = 'visible'
+            }
+
+            const initMediaRecorder = (stream, mt) => {
+                mediaRecorder = new MediaRecorder(stream, {mimeType: mt})
+                mediaRecorder.ondataavailable = (e) => {
+                    recordedData.push(e.data);
+                }
+                mediaRecorder.onstart = () => {
+                    console.log('started recording')
+                }
+                mediaRecorder.onstop = (e) => {
+                    console.log('stopped recording')
+                    recordedDataBlob = new Blob(recordedData, {type: mt});
+                    updateSrcURL(recordedDataBlob)
+                    recordedData.map(() => {
+                        return false
+                    })
+                }
+            }
+            
+            const instantiateMediaRecorder = () => {
+                navigator.mediaDevices.getUserMedia({video: false, audio: true})
+                    .then((stream) => {
+                        // non-Safari version
+                        try {
+                            initMediaRecorder(stream, 'audio/webm')
+                        } catch (error) {
+                            console.log('This browser does not support mime type: audio/webm');
+                        }
+
+                        try {
+                            initMediaRecorder(stream, 'audio/mp4')
+                        } catch (error) {
+                            console.log('This browser does not support mime type: audio/mp4');
+                        }
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
+                }
+            
+            const initAudioSrcFile = () => {
+                let audio
+                fetch(audioSrcFile)
+                    .then((response) => {
+                        return response.blob()
+                    })
+                    .then((blob) => {
+                        console.log(URL.createObjectURL(blob))
+                        updateSrcURL(blob)
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
+            }
+            
+            const handleStart = () => {
+                if( mediaRecorder ) {
+                    mediaRecorder.start()
+                }
+            }
+            
+            const handleStop = () => {
+                if( mediaRecorder ) {
+                    mediaRecorder.stop()
+                }
+            }
+
+            // document ready init()
+            // attach start and stop handlers to buttons
+            document.addEventListener('DOMContentLoaded', () => {
+                instantiateMediaRecorder()
+                initAudioSrcFile()
+                document.querySelector('#start').addEventListener('click', handleStart)
+                document.querySelector('#stop').addEventListener('click', handleStop)
+            })
+        </script>
     </head>
     <body>
         <p>Fails in Safari
@@ -10,6 +97,16 @@
         <audio controls src="./573840__msxp__jazz-bar-people-ambience-la-fontaine-copenhagen.wav"><source src="./573840__msxp__jazz-bar-people-ambience-la-fontaine-copenhagen.wav" /></audio></p>
         
         <p>Works in Safari
-        <audio controls><source src="573840__msxp__jazz-bar-people-ambience-la-fontaine-copenhagen.wav" /></audio></p>
+        <audio controls><source src="./573840__msxp__jazz-bar-people-ambience-la-fontaine-copenhagen.wav" /></audio></p>
+
+        <section>
+            <button id="start">Start</button>
+            <button id="stop">Stop</button>
+            <div id="audioContainer">
+                <div id="loading">Loading... the test file is 31MB</div>
+                <audio id="audio" controls style="visibility: hidden">
+                </audio>
+            </div>
+        </section>
     </body>
 </html>
