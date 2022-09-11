@@ -1,67 +1,25 @@
 import {useEffect, useRef, useState} from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 function App() {
 
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [audioSrc, setAudioSrc] = useState<string>('');
-  const [audioAtts, setAudioAtts] = useState<Record<string, any>>({});
+  const [audioMimeType, setAudioMimeType] = useState<string>('');
   const recordedData: any[] = []
   
   useEffect(() => {
-    let recordedDataBlob
     navigator.mediaDevices.getUserMedia({video: false, audio: true})
       .then((stream) => {
         try {
-          const mediaRecorder = new MediaRecorder(stream, {mimeType: 'audio/webm'});
-          setMediaRecorder(mediaRecorder);
-          mediaRecorder.ondataavailable = (e) => {
-            recordedData.push(e.data);
-          }
-          mediaRecorder.onstart = () => {
-            console.log('started recording')
-          }
-          mediaRecorder.onstop = (e) => {
-            recordedDataBlob = new Blob(recordedData, {type: 'audio/webm'});
-            const src = URL.createObjectURL(recordedDataBlob)
-            setAudioSrc(src)
-            setAudioAtts({
-              controls: true,
-              src: src
-            })
-          }
-          setMediaRecorder(mediaRecorder)
-        } catch (e) {
-          console.error(e);
+          initMediaRecorder(stream, 'audio/webm')
+        } catch (error) {
           console.log('This browser does not support mime type: audio/webm');
         }
-
+        
         try {
-          const mr = new MediaRecorder(stream, {mimeType: 'audio/mp4'});
-          mr.ondataavailable = (e) => {
-            // append chunks
-            recordedData.push(e.data)
-          }
-          mr.onstart = () => {
-            console.log('started recording')
-          }
-          mr.onstop = (e) => {
-            console.log('stopped recording')
-            // make blob
-            recordedDataBlob = new Blob(recordedData)
-            // assign it as a source for an audio element?
-            setAudioSrc(URL.createObjectURL(recordedDataBlob))
-            recordedData.map(() => {
-              return false
-            })
-            setAudioAtts({
-              controls: true
-            })
-          }
-          setMediaRecorder(mr)
+          initMediaRecorder(stream, 'audio/mp4')
         } catch (error) {
-          console.error(error);
           console.log('This browser does not support mime type: audio/mp4');
         }
       })
@@ -70,6 +28,29 @@ function App() {
       })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioSrc])
+
+  const initMediaRecorder = (stream: MediaStream, mt: string) => {
+    let recordedDataBlob
+    setAudioMimeType(mt)
+    const mr = new MediaRecorder(stream, {mimeType: mt});
+    mr.ondataavailable = (e) => {
+      console.log('pushing a chunk')
+      recordedData.push(e.data)
+    }
+    mr.onstart = () => {
+      console.log('started recording')
+    }
+    mr.onstop = (e) => {
+      console.log('stopped recording')
+      recordedDataBlob = new Blob(recordedData, {type: mt})
+      setAudioSrc(URL.createObjectURL(recordedDataBlob))
+
+      recordedData.map(() => {
+        return false
+      })
+    }
+    setMediaRecorder(mr)
+  }
 
   const handleStart = () => {
     if( mediaRecorder ) {
@@ -83,23 +64,13 @@ function App() {
     }
   }
 
-  const handlePlay = () => {
-
-  }
-
-  const handlePause = () => {
-
-  }
-
   return (
     <div className="App">
       <header className="App-header">Record Test</header>
       <button onClick={handleStart}>Start</button>
       <button onClick={handleStop}>Stop</button>
-      <button onClick={handlePlay}>Play</button>
-      <button onClick={handlePause}>Pause</button>
-      <audio {...audioAtts} controls>
-        <source src={audioSrc} type="audio/mp4" />
+      <audio src={audioSrc} controls>
+        <source src={audioSrc} type={audioMimeType} />
       </audio>
     </div>
   );
